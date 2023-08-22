@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // TIMELINE
-import { Timeline, DataSet } from "vis-timeline/standalone";
+import { DataSet } from "vis-data/esnext";
+import { Timeline } from "vis-timeline/esnext";
+import "vis-timeline/styles/vis-timeline-graph2d.min.css";
 // MATERIAL UI
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -8,7 +10,9 @@ import Paper from "@mui/material/Paper";
 import Toolbar from "@mui/material/Toolbar";
 // CONTENTS
 import TimelineLanguageSwitcher from "./contents/TimelineLanguageSwitcher";
-
+import moment from "moment";
+import "moment/dist/locale/tr";
+window.moment = moment;
 const DAY = 24 * 60 * 60 * 1000;
 
 function App() {
@@ -17,6 +21,7 @@ function App() {
   const timelineElementRef = useRef();
   // STATE
   const [selectedLang, setSelectedLang] = useState("en");
+
   // CHANGE LANGUAGE
   const changeSelectedLanguage = useCallback((langVal) => {
     setSelectedLang(langVal);
@@ -37,11 +42,27 @@ function App() {
       showCurrentTime: true,
       height: "100%",
       locale: selectedLang,
+      locales: {
+        // create a new locale (text strings should be replaced with localized strings)
+        tr: {
+          current: "Şimdi",
+          time: "zaman",
+          deleteSelected: "Seçileni Sil",
+        },
+        en: {
+          current: "Current",
+          time: "time",
+          deleteSelected: "Delete Selected",
+        },
+      },
     };
   }, [selectedLang]);
-  
+  // LOCALIZE MOMENT
   useEffect(() => {
-    
+    moment.locale(selectedLang);
+  }, [selectedLang]);
+  // CREATE TIMELINE
+  useEffect(() => {
     if (timelineElementRef.current && !timelineRef.current) {
       timelineRef.current = new Timeline(
         timelineElementRef.current,
